@@ -54,7 +54,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public void update(Integer id, ItemRequest itemRequest) {
-        Optional<Item> itemOpt =itemRepository.findByIdAndIsDeleted(id, false);
+        Optional<Item> itemOpt = itemRepository.findByIdAndIsDeleted(id, false);
         if (itemOpt.isPresent()) {
             itemRequest.setId(id);
             Item item = itemOpt.get();

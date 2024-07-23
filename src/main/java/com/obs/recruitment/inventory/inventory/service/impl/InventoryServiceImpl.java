@@ -22,62 +22,62 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class InventoryServiceImpl implements InventoryService {
-    private final InventoryRepository itemRepository;
-    private final InventorySpecification itemSpecification;
-    private final InventoryMapper itemMapper;
+    private final InventoryRepository inventoryRepository;
+    private final InventorySpecification inventorySpecification;
+    private final InventoryMapper inventoryMapper;
 
     @Override
     @Transactional
     public void delete(Integer id) {
-        Optional<Inventory> itemOpt = itemRepository.findByIdAndIsDeleted(id, false);
-        if (itemOpt.isPresent()) {
-            Inventory item = itemOpt.get();
-            item.setDeleted(true);
-            itemRepository.save(item);
+        Optional<Inventory> inventoryOpt = inventoryRepository.findByIdAndIsDeleted(id, false);
+        if (inventoryOpt.isPresent()) {
+            Inventory inventory = inventoryOpt.get();
+            inventory.setDeleted(true);
+            inventoryRepository.save(inventory);
         } else {
-            throw new DataNotFoundException("Item not found" + id);
+            throw new DataNotFoundException("Inventory not found" + id);
         }
     }
 
 
     @Override
     public Page<InventoryResponse> getAll(Pageable pageable) {
-        Page<Inventory> itemPage = itemRepository.findAll(itemSpecification.findAllPredicate(), pageable);
-        List<InventoryResponse> itemResponses = itemPage.getContent().stream().map(itemMapper::mapToItemResponse)
+        Page<Inventory> inventoryPage = inventoryRepository.findAll(inventorySpecification.findAllPredicate(), pageable);
+        List<InventoryResponse> inventoryResponses = inventoryPage.getContent().stream().map(inventoryMapper::mapToInventoryResponse)
                 .toList();
         return new PageImpl<>(
-                itemResponses,
-                itemPage.getPageable(),
-                itemPage.getTotalElements()
+                inventoryResponses,
+                inventoryPage.getPageable(),
+                inventoryPage.getTotalElements()
         );
     }
 
     @Override
-    public void update(Integer id, InventoryRequest itemRequest) {
-        Optional<Inventory> itemOpt =itemRepository.findByIdAndIsDeleted(id, false);
-        if (itemOpt.isPresent()) {
-            Inventory item = itemOpt.get();
-            Inventory itemMapped = itemMapper.mapToItem(item, itemRequest);
-            itemRepository.save(itemMapped);
+    public void update(Integer id, InventoryRequest inventoryRequest) {
+        Optional<Inventory> inventoryOpt = inventoryRepository.findByIdAndIsDeleted(id, false);
+        if (inventoryOpt.isPresent()) {
+            Inventory inventory = inventoryOpt.get();
+            Inventory inventoryMapped = inventoryMapper.mapToInventory(inventory, inventoryRequest);
+            inventoryRepository.save(inventoryMapped);
         } else {
-            throw new DataNotFoundException("Item not found" + id);
+            throw new DataNotFoundException("Inventory not found" + id);
         }
     }
 
     @Override
     public InventoryResponse get(Integer id) {
-        Optional<Inventory> itemOpt = itemRepository.findByIdAndIsDeleted(id, false);
-        if (itemOpt.isPresent()) {
-            Inventory item = itemOpt.get();
-            return itemMapper.mapToItemResponse(item);
+        Optional<Inventory> inventoryOpt = inventoryRepository.findByIdAndIsDeleted(id, false);
+        if (inventoryOpt.isPresent()) {
+            Inventory inventory = inventoryOpt.get();
+            return inventoryMapper.mapToInventoryResponse(inventory);
         } else {
-            throw new DataNotFoundException("Item not found" + id);
+            throw new DataNotFoundException("Inventory not found" + id);
         }
     }
 
     @Override
-    public void create(InventoryRequest itemRequest) {
-        Inventory itemMapped = itemMapper.mapToItem(itemRequest);
-        itemRepository.save(itemMapped);
+    public void create(InventoryRequest inventoryRequest) {
+        Inventory inventoryMapped = inventoryMapper.mapToInventory(inventoryRequest);
+        inventoryRepository.save(inventoryMapped);
     }
 }

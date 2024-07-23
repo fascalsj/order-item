@@ -1,5 +1,6 @@
 package com.obs.recruitment.inventory.inventory.model;
 
+import com.obs.recruitment.inventory.item.model.Item;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,7 +10,7 @@ import lombok.Setter;
 @Getter
 public class Inventory {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID")
     private Integer id;
 
@@ -24,4 +25,8 @@ public class Inventory {
 
     @Column(name = "IS_DELETED")
     private boolean isDeleted;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "item_id", referencedColumnName = "id", insertable = false, updatable = false)
+    private Item item;
 }

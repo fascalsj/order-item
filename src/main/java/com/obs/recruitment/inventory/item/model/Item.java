@@ -1,10 +1,12 @@
 package com.obs.recruitment.inventory.item.model;
 
+import com.obs.recruitment.inventory.inventory.model.Inventory;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Entity
 @Setter
@@ -23,4 +25,7 @@ public class Item {
 
     @Column(name = "IS_DELETED")
     private boolean isDeleted;
+
+    @OneToMany(mappedBy = "item", targetEntity = Inventory.class, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    List<Inventory> inventories;
 }

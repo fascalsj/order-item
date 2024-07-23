@@ -7,19 +7,20 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
-import org.mapstruct.factory.Mappers;
 
 @Mapper(componentModel = "spring")
 public interface InventoryMapper {
 
-    InventoryResponse mapToItemResponse(Inventory item);
+    InventoryResponse mapToInventoryResponse(Inventory item);
 
     @Named("mapEdit")
     @Mapping(target = "deleted", ignore = true)
-    Inventory mapToItem(@MappingTarget Inventory item, InventoryRequest itemRequest);
+    @Mapping(target = "item", ignore = true)
+    Inventory mapToInventory(@MappingTarget Inventory inventory, InventoryRequest itemRequest);
 
     @Named("mapCreate")
     @Mapping(target = "deleted", ignore = true)
-    Inventory mapToItem(InventoryRequest itemRequest);
+    @Mapping(target = "item", ignore = true)
+    Inventory mapToInventory(InventoryRequest inventoryRequest);
 
 }

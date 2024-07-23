@@ -8,6 +8,7 @@ import lombok.Setter;
 @Getter
 public class InventoryResponse {
     private Integer id;
+    private Integer itemId;
     private Integer qty;
     private String type;
 }

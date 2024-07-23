@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 @Getter
 public class InventoryRequest {
     private Integer id;
+    private Integer itemId;
     private Integer qty;
     private String type;
 }

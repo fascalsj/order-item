@@ -14,10 +14,12 @@ public interface ItemMapper {
 
     @Named("mapEdit")
     @Mapping(target = "deleted", ignore = true)
+    @Mapping(target = "inventories", ignore = true)
     Item mapToItem(@MappingTarget Item item, ItemRequest itemRequest);
 
     @Named("mapCreate")
     @Mapping(target = "deleted", ignore = true)
+    @Mapping(target = "inventories", ignore = true)
     Item mapToItem(ItemRequest itemRequest);
 
 }
