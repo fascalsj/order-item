@@ -144,7 +144,7 @@ class ItemServiceImplTest {
         when(itemMapper.mapToItemResponse(any())).thenReturn(itemResponse);
 
         // Act
-        ItemResponse result = itemService.get(itemId);
+        ItemResponse result = itemService.getResponse(itemId);
 
         // Assert
         assertNotNull(result);
@@ -158,7 +158,7 @@ class ItemServiceImplTest {
         when(itemRepository.findByIdAndIsDeleted(anyInt(), anyBoolean())).thenReturn(Optional.empty());
 
         // Act and Assert
-        assertThrows(DataNotFoundException.class, () -> itemService.get(itemId));
+        assertThrows(DataNotFoundException.class, () -> itemService.getResponse(itemId));
     }
 
     @Test

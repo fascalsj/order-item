@@ -2,11 +2,11 @@ package com.obs.recruitment.order.item.item.service.impl;
 
 import com.obs.recruitment.order.item.item.dto.request.ItemRequest;
 import com.obs.recruitment.order.item.item.dto.response.ItemResponse;
+import com.obs.recruitment.order.item.item.mapper.ItemMapper;
 import com.obs.recruitment.order.item.item.model.Item;
 import com.obs.recruitment.order.item.item.repository.ItemRepository;
 import com.obs.recruitment.order.item.item.repository.specification.ItemSpecification;
 import com.obs.recruitment.order.item.item.service.ItemService;
-import com.obs.recruitment.order.item.item.mapper.ItemMapper;
 import com.obs.recruitment.order.item.shared.exception.DataNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -23,6 +23,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
+    public static final String ITEM_NOT_FOUND = "Item not found";
     private final ItemRepository itemRepository;
     private final ItemSpecification itemSpecification;
     private final ItemMapper itemMapper;
@@ -36,7 +37,7 @@ public class ItemServiceImpl implements ItemService {
             item.setDeleted(true);
             itemRepository.save(item);
         } else {
-            throw new DataNotFoundException("Item not found" + id);
+            throw new DataNotFoundException(ITEM_NOT_FOUND + id);
         }
     }
 
@@ -61,26 +62,32 @@ public class ItemServiceImpl implements ItemService {
             itemRequest.setId(id);
             Item item = itemOpt.get();
             Item itemMapped = itemMapper.mapToItem(item, itemRequest);
-            itemRepository.save(itemMapped);
+            upsert(itemMapped);
         } else {
-            throw new DataNotFoundException("Item not found" + id);
+            throw new DataNotFoundException(ITEM_NOT_FOUND + id);
         }
     }
 
     @Override
-    public ItemResponse get(Integer id) {
-        Optional<Item> itemOpt = itemRepository.findByIdAndIsDeleted(id, false);
-        if (itemOpt.isPresent()) {
-            Item item = itemOpt.get();
-            return itemMapper.mapToItemResponse(item);
-        } else {
-            throw new DataNotFoundException("Item not found" + id);
-        }
+    public ItemResponse getResponse(Integer id) {
+        Item item = get(id);
+        return itemMapper.mapToItemResponse(item);
+    }
+
+    @Override
+    public Item get(Integer id) {
+        return itemRepository.findByIdAndIsDeleted(id, false)
+                .orElseThrow(() -> new DataNotFoundException(ITEM_NOT_FOUND + id));
     }
 
     @Override
     public void create(ItemRequest itemRequest) {
         Item itemMapped = itemMapper.mapToItem(itemRequest);
-        itemRepository.save(itemMapped);
+        upsert(itemMapped);
+    }
+
+    @Override
+    public void upsert(Item item) {
+        itemRepository.save(item);
     }
 }

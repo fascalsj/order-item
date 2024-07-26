@@ -23,6 +23,7 @@ class ItemRepositoryTest {
         item.setDeleted(true);
         item.setId(1);
         item.setName("Botol");
+        item.setStock(10);
         item.setPrice(BigDecimal.valueOf(5000));
         item.setDeleted(true);
         itemRepository.save(item);
@@ -37,12 +38,13 @@ class ItemRepositoryTest {
         item.setDeleted(true);
         item.setId(1);
         item.setName("Botol");
+        item.setStock(10);
         item.setPrice(BigDecimal.valueOf(5000));
         item.setDeleted(true);
         itemRepository.save(item);
 
         ItemSpecification itemSpecification = new ItemSpecification();
-        Specification<Item> search = itemSpecification.findAllPredicate("search");
+        Specification<Item> search = itemSpecification.findAllPredicate("bot");
 
         List<Item> items = itemRepository.findAll(search);
         Assertions.assertNotNull(items);

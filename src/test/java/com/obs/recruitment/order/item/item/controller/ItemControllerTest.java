@@ -63,7 +63,7 @@ class ItemControllerTest {
 
         ItemResponse itemResponse = easyRandom.nextObject(ItemResponse.class);
 
-        when(itemService.get(anyInt())).thenReturn(itemResponse);
+        when(itemService.getResponse(anyInt())).thenReturn(itemResponse);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/item/{id}", itemId))
                 .andExpect(MockMvcResultMatchers.status().isOk())

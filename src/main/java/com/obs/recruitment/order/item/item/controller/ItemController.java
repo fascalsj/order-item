@@ -40,7 +40,7 @@ public class ItemController {
     }
 
     @PostMapping()
-    ResponseEntity<GlobalResponse<Object>> update(@RequestBody ItemRequest itemRequest) {
+    ResponseEntity<GlobalResponse<Object>> create(@RequestBody ItemRequest itemRequest) {
         itemService.create(itemRequest);
         return ResponseEntity
                 .status(HttpStatus.CREATED.value())
@@ -62,7 +62,7 @@ public class ItemController {
 
     @GetMapping("{id}")
     ResponseEntity<GlobalResponse<Object>> get(@PathVariable("id") Integer id) {
-        ItemResponse itemResponse = itemService.get(id);
+        ItemResponse itemResponse = itemService.getResponse(id);
         return ResponseEntity.ok().body(GlobalResponse.builder()
                 .code(HttpStatus.OK.value())
                 .result(itemResponse)

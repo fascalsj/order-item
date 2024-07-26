@@ -6,13 +6,13 @@ import com.obs.recruitment.order.item.inventory.mapper.InventoryMapper;
 import com.obs.recruitment.order.item.inventory.model.Inventory;
 import com.obs.recruitment.order.item.inventory.repository.InventoryRepository;
 import com.obs.recruitment.order.item.inventory.repository.specification.InventorySpecification;
+import com.obs.recruitment.order.item.item.model.Item;
+import com.obs.recruitment.order.item.item.service.ItemService;
 import com.obs.recruitment.order.item.shared.exception.DataNotFoundException;
 import jakarta.persistence.criteria.Predicate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-public class InventoryServiceImplTest {
+class InventoryServiceImplTest {
 
     @Mock
     private InventoryRepository inventoryRepository;
@@ -38,6 +38,12 @@ public class InventoryServiceImplTest {
     @Mock
     private InventoryMapper inventoryMapper;
 
+    @Mock
+    private ItemService itemService;
+
+    @Captor
+    ArgumentCaptor<Item> itemArgumentCaptor;
+
     @InjectMocks
     private InventoryServiceImpl inventoryService;
 
@@ -47,7 +53,7 @@ public class InventoryServiceImplTest {
     }
 
     @Test
-    public void deleteExistingInventory() {
+    void delete() {
         // Mock data
         Integer inventoryId = 1;
         Inventory inventory = new Inventory();
@@ -63,7 +69,7 @@ public class InventoryServiceImplTest {
     }
 
     @Test
-    public void deleteNonExistingInventory() {
+    void delete_WhenNotExist_ThenThrow() {
         // Mock data
         Integer inventoryId = 1;
         when(inventoryRepository.findByIdAndIsDeleted(anyInt(), anyBoolean())).thenReturn(Optional.empty());
@@ -76,7 +82,7 @@ public class InventoryServiceImplTest {
     }
 
     @Test
-    public void getAllInventory() {
+    void getAll() {
         // Mock data
         Pageable pageable = PageRequest.of(0, 5);
         List<Inventory> inventoryList = List.of(new Inventory(), new Inventory());
@@ -102,23 +108,54 @@ public class InventoryServiceImplTest {
     }
 
     @Test
-    public void updateExistingInventory() {
-        // Mock data
-        Integer inventoryId = 1;
-        InventoryRequest request = new InventoryRequest();
+    void update_WhenWithDraw_Success() {
         Inventory inventory = new Inventory();
-        when(inventoryRepository.findByIdAndIsDeleted(anyInt(), anyBoolean())).thenReturn(Optional.of(inventory));
-        when(inventoryMapper.mapToInventory(any(), any())).thenReturn(inventory);
+        inventory.setQty(20);
 
-        // Call service method
-        assertDoesNotThrow(() -> inventoryService.update(inventoryId, request));
+        InventoryRequest request = new InventoryRequest();
+        request.setQty(5);
+        request.setItemId(1);
+        request.setType("W");
+        when(inventoryRepository.findByIdAndIsDeleted(1, false)).thenReturn(Optional.of(inventory));
+        when(inventoryMapper.mapToInventory(request)).thenReturn(inventory);
 
-        // Verify
-        verify(inventoryRepository, times(1)).save(any());
+        Item item = new Item();
+        item.setStock(20);
+        when(itemService.get(1)).thenReturn(item);
+
+        inventoryService.update(1, request);
+
+        verify(inventoryRepository).save(inventory);
+        verify(itemService).upsert(itemArgumentCaptor.capture());
+        assertEquals(5, itemArgumentCaptor.getValue().getStock());
+    }
+
+
+    @Test
+    void update_WhenTopup_Success() {
+        Inventory inventory = new Inventory();
+        inventory.setQty(20);
+
+        InventoryRequest request = new InventoryRequest();
+        request.setQty(5);
+        request.setItemId(1);
+        request.setType("T");
+        when(inventoryRepository.findByIdAndIsDeleted(1, false)).thenReturn(Optional.of(inventory));
+        when(inventoryMapper.mapToInventory(request)).thenReturn(inventory);
+
+        Item item = new Item();
+        item.setStock(20);
+        when(itemService.get(1)).thenReturn(item);
+
+        inventoryService.update(1, request);
+
+        verify(inventoryRepository).save(inventory);
+        verify(itemService).upsert(itemArgumentCaptor.capture());
+        assertEquals(25, itemArgumentCaptor.getValue().getStock());
     }
 
     @Test
-    public void updateNonExistingInventory() {
+    void update_WhenNotExist_ThenThrow() {
         // Mock data
         Integer inventoryId = 1;
         InventoryRequest request = new InventoryRequest();
@@ -132,7 +169,7 @@ public class InventoryServiceImplTest {
     }
 
     @Test
-    public void getExistingInventory() {
+    void get() {
         // Mock data
         Integer inventoryId = 1;
         Inventory inventory = new Inventory();
@@ -147,7 +184,7 @@ public class InventoryServiceImplTest {
     }
 
     @Test
-    public void getNonExistingInventory() {
+    void get_WhenNotExist_ThenThrow() {
         // Mock data
         Integer inventoryId = 1;
         when(inventoryRepository.findByIdAndIsDeleted(anyInt(), anyBoolean())).thenReturn(Optional.empty());
@@ -157,16 +194,43 @@ public class InventoryServiceImplTest {
     }
 
     @Test
-    public void createInventory() {
-        // Mock data
+    void create_WhenTopUp_Success() {
         InventoryRequest request = new InventoryRequest();
+        request.setQty(10);
+        request.setItemId(1);
+        request.setType("T");
         Inventory inventory = new Inventory();
-        when(inventoryMapper.mapToInventory(any())).thenReturn(inventory);
+        when(inventoryMapper.mapToInventory(request)).thenReturn(inventory);
 
-        // Call service method
-        assertDoesNotThrow(() -> inventoryService.create(request));
+        Item item = new Item();
+        item.setStock(5);
+        when(itemService.get(1)).thenReturn(item);
 
-        // Verify
-        verify(inventoryRepository, times(1)).save(any());
+        inventoryService.create(request);
+
+        verify(inventoryRepository).save(inventory);
+        verify(itemService).upsert(item);
+        assertEquals(15, item.getStock());
+    }
+
+
+    @Test
+    void create_WhenWithDraw_Success() {
+        InventoryRequest request = new InventoryRequest();
+        request.setQty(10);
+        request.setItemId(1);
+        request.setType("T");
+        Inventory inventory = new Inventory();
+        when(inventoryMapper.mapToInventory(request)).thenReturn(inventory);
+
+        Item item = new Item();
+        item.setStock(5);
+        when(itemService.get(1)).thenReturn(item);
+
+        inventoryService.create(request);
+
+        verify(inventoryRepository).save(inventory);
+        verify(itemService).upsert(item);
+        assertEquals(15, item.getStock());
     }
 }

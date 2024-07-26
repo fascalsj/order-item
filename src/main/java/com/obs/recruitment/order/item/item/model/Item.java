@@ -1,6 +1,7 @@
 package com.obs.recruitment.order.item.item.model;
 
 import com.obs.recruitment.order.item.inventory.model.Inventory;
+import com.obs.recruitment.order.item.order.model.Order;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -23,9 +24,15 @@ public class Item {
     @Column(name = "PRICE")
     private BigDecimal price;
 
+    @Column(name = "STOCK")
+    private Integer stock;
+
     @Column(name = "IS_DELETED")
     private boolean isDeleted;
 
     @OneToMany(mappedBy = "item", targetEntity = Inventory.class, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     List<Inventory> inventories;
+
+    @OneToMany(mappedBy = "item", targetEntity = Inventory.class, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    List<Order> orders;
 }
