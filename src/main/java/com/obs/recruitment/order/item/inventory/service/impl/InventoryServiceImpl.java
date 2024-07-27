@@ -24,7 +24,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class InventoryServiceImpl implements InventoryService {
-    public static final String INVENTORY_NOT_FOUND = "Inventory not found";
+    public static final String INVENTORY_NOT_FOUND = "Inventory not found ";
     private final InventoryRepository inventoryRepository;
     private final InventorySpecification inventorySpecification;
     private final InventoryMapper inventoryMapper;

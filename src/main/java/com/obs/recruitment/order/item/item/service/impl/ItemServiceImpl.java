@@ -36,7 +36,7 @@ public class ItemServiceImpl implements ItemService {
             item.setDeleted(true);
             itemRepository.save(item);
         } else {
-            throw new DataNotFoundException("Item not found" + id);
+            throw new DataNotFoundException("Item not found " + id);
         }
     }
 
@@ -63,7 +63,7 @@ public class ItemServiceImpl implements ItemService {
             Item itemMapped = itemMapper.mapToItem(item, itemRequest);
             upsert(itemMapped);
         } else {
-            throw new DataNotFoundException("Item not found" + id);
+            throw new DataNotFoundException("Item not found " + id);
         }
     }
 
@@ -76,7 +76,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public Item get(Integer id) {
         return itemRepository.findByIdAndIsDeleted(id, false)
-                .orElseThrow(() -> new DataNotFoundException("Item not found" + id));
+                .orElseThrow(() -> new DataNotFoundException("Item not found " + id));
     }
 
     @Override

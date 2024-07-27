@@ -27,7 +27,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
-    public static final String ORDER_NOT_FOUND = "Order not found";
+    public static final String ORDER_NOT_FOUND = "Order not found ";
     private final OrderRepository orderRepository;
     private final OrderSeqRepository orderSeqRepository;
     private final OrderSpecification orderSpecification;
