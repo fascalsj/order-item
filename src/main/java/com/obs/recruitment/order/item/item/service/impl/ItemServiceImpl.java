@@ -23,7 +23,6 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
-    public static final String ITEM_NOT_FOUND = "Item not found";
     private final ItemRepository itemRepository;
     private final ItemSpecification itemSpecification;
     private final ItemMapper itemMapper;
@@ -37,7 +36,7 @@ public class ItemServiceImpl implements ItemService {
             item.setDeleted(true);
             itemRepository.save(item);
         } else {
-            throw new DataNotFoundException(ITEM_NOT_FOUND + id);
+            throw new DataNotFoundException("Item not found" + id);
         }
     }
 
@@ -64,7 +63,7 @@ public class ItemServiceImpl implements ItemService {
             Item itemMapped = itemMapper.mapToItem(item, itemRequest);
             upsert(itemMapped);
         } else {
-            throw new DataNotFoundException(ITEM_NOT_FOUND + id);
+            throw new DataNotFoundException("Item not found" + id);
         }
     }
 
@@ -77,7 +76,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public Item get(Integer id) {
         return itemRepository.findByIdAndIsDeleted(id, false)
-                .orElseThrow(() -> new DataNotFoundException(ITEM_NOT_FOUND + id));
+                .orElseThrow(() -> new DataNotFoundException("Item not found" + id));
     }
 
     @Override

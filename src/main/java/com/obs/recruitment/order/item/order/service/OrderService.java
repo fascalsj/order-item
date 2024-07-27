@@ -10,7 +10,7 @@ public interface OrderService {
 
     void delete(String id);
 
-    Page<OrderResponse> getAll(Pageable pageable, String search);
+    Page<OrderResponse> getAll(Pageable pageable);
 
     void update(String id, OrderRequest orderRequest);
 

@@ -8,7 +8,7 @@ import lombok.Setter;
 @Entity
 @Setter
 @Getter
-public class Order {
+public class Orders {
     @Id
     @Column(name = "ORDER_NO")
     private String orderNo;

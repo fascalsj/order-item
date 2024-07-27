@@ -28,9 +28,8 @@ public class OrderController {
 
     @GetMapping()
     ResponseEntity<GlobalResponse<Object>> getAll(@RequestParam(name = "page", defaultValue = "0") int page,
-                                                  @RequestParam(name = "size", defaultValue = "5") int size,
-                                                  @RequestParam(name = "search", defaultValue = "") String search) {
-        Page<OrderResponse> orderResponses = orderService.getAll(PageRequest.of(page, size), search);
+                                                  @RequestParam(name = "size", defaultValue = "5") int size) {
+        Page<OrderResponse> orderResponses = orderService.getAll(PageRequest.of(page, size));
         return ResponseEntity.ok().body(
                 GlobalResponse.builder()
                         .code(HttpStatus.OK.value())

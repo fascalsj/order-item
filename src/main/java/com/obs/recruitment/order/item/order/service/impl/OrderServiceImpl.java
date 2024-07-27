@@ -5,15 +5,13 @@ import com.obs.recruitment.order.item.item.service.ItemService;
 import com.obs.recruitment.order.item.order.dto.request.OrderRequest;
 import com.obs.recruitment.order.item.order.dto.response.OrderResponse;
 import com.obs.recruitment.order.item.order.mapper.OrderMapper;
-import com.obs.recruitment.order.item.order.model.Order;
 import com.obs.recruitment.order.item.order.model.OrderSeq;
+import com.obs.recruitment.order.item.order.model.Orders;
 import com.obs.recruitment.order.item.order.repository.OrderRepository;
 import com.obs.recruitment.order.item.order.repository.OrderSeqRepository;
 import com.obs.recruitment.order.item.order.repository.specification.OrderSpecification;
 import com.obs.recruitment.order.item.order.service.OrderService;
 import com.obs.recruitment.order.item.shared.exception.DataNotFoundException;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -36,15 +34,12 @@ public class OrderServiceImpl implements OrderService {
     private final OrderMapper orderMapper;
     private final ItemService itemService;
 
-    @PersistenceContext
-    private EntityManager entityManager;
-
     @Override
     @Transactional
     public void delete(String orderId) {
-        Optional<Order> orderOpt = orderRepository.findByOrderNoAndIsDeleted(orderId, false);
+        Optional<Orders> orderOpt = orderRepository.findByOrderNoAndIsDeleted(orderId, false);
         if (orderOpt.isPresent()) {
-            Order order = orderOpt.get();
+            Orders order = orderOpt.get();
             order.setDeleted(true);
             orderRepository.save(order);
         } else {
@@ -54,9 +49,9 @@ public class OrderServiceImpl implements OrderService {
 
 
     @Override
-    public Page<OrderResponse> getAll(Pageable pageable, String search) {
-        Specification<Order> allPredicate = orderSpecification.findAllPredicate(search);
-        Page<Order> orderPage = orderRepository.findAll(allPredicate, pageable);
+    public Page<OrderResponse> getAll(Pageable pageable ) {
+        Specification<Orders> allPredicate = orderSpecification.findAllPredicate();
+        Page<Orders> orderPage = orderRepository.findAll(allPredicate, pageable);
         List<OrderResponse> orderResponses = orderPage.getContent().stream().map(orderMapper::mapToOrderResponse)
                 .toList();
         return new PageImpl<>(
@@ -69,15 +64,15 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public void update(String orderId, OrderRequest orderRequest) {
 
-        Optional<Order> orderOpt = orderRepository.findByOrderNoAndIsDeleted(orderId, false);
+        Optional<Orders> orderOpt = orderRepository.findByOrderNoAndIsDeleted(orderId, false);
         if (orderOpt.isPresent()) {
-            Order order = orderOpt.get();
+            Orders order = orderOpt.get();
 
             Integer qty = order.getQty();
             Integer qtyRequest = orderRequest.getQty();
 
             orderRequest.setOrderNo(orderId);
-            Order orderMapped = orderMapper.mapToOrder(order, orderRequest);
+            Orders orderMapped = orderMapper.mapToOrder(order, orderRequest);
 
             Integer quantity = qtyRequest >= qty ? qtyRequest - qty : qty - qtyRequest;
             Item item = itemService.get(order.getItemId());
@@ -91,9 +86,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrderResponse get(String orderId) {
-        Optional<Order> orderOpt = orderRepository.findByOrderNoAndIsDeleted(orderId, false);
+        Optional<Orders> orderOpt = orderRepository.findByOrderNoAndIsDeleted(orderId, false);
         if (orderOpt.isPresent()) {
-            Order order = orderOpt.get();
+            Orders order = orderOpt.get();
             return orderMapper.mapToOrderResponse(order);
         } else {
             throw new DataNotFoundException(ORDER_NOT_FOUND + orderId);
@@ -101,10 +96,10 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Transactional
     public void create(OrderRequest orderRequest) {
-        Order orderMapped = new Order();
         Integer itemId = orderRequest.getItemId();
-        orderMapped = orderMapper.mapToOrder(orderRequest);
+        Orders orderMapped = orderMapper.mapToOrder(orderRequest);
 
         OrderSeq orderSeq = orderSeqRepository.findAll().getFirst();
         Integer orderIdInc = orderSeq.getOrderIdInc();
@@ -113,12 +108,10 @@ public class OrderServiceImpl implements OrderService {
         orderSeq.setOrderIdInc(increment);
         orderSeqRepository.save(orderSeq);
 
-
         Item item = itemService.get(itemId);
         item.setStock(item.getStock() - orderRequest.getQty());
 
         orderMapped.setOrderNo("O" + increment);
-        entityManager.persist(orderMapped);
-        entityManager.flush();
+        orderRepository.save(orderMapped);
     }
 }
