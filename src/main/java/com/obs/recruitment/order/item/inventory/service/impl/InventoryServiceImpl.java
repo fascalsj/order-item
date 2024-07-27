@@ -77,7 +77,14 @@ public class InventoryServiceImpl implements InventoryService {
         Item item = itemService.get(itemId);
         Integer quantity = inventoryRequest.getQty();
 
-        saveInventoryAndUpdateStock(type, item, quantity, inventoryMapped);
+        if ("W".equals(type)) {
+            substractItem(item, quantity);
+        } else if ("T".equals(type)) {
+            item.setStock(item.getStock() + quantity);
+        }
+
+        itemService.upsert(item);
+        inventoryRepository.save(inventoryMapped);
     }
 
     @Override
@@ -94,21 +101,23 @@ public class InventoryServiceImpl implements InventoryService {
 
         Item item = itemService.get(itemId);
 
-        Integer quantity = qtyRequest > qtyInventory ? qtyRequest - qtyInventory : qtyInventory - qtyRequest;
+        Integer quantity = qtyInventory - qtyRequest;
 
-        saveInventoryAndUpdateStock(type, item, quantity, inventoryMapped);
-    }
-
-    private void saveInventoryAndUpdateStock(String type, Item item, Integer quantity, Inventory inventoryMapped) {
-        if ("W".equals(type)) {
-            if (item.getStock() > 0) {
-                item.setStock(item.getStock() - quantity);
-            }
-        } else if ("T".equals(type)) {
+        if ("T".equals(type)) {
+            substractItem(item, quantity);
+        } else if ("W".equals(type)) {
             item.setStock(item.getStock() + quantity);
         }
 
         itemService.upsert(item);
         inventoryRepository.save(inventoryMapped);
+    }
+
+    private static void substractItem(Item item, Integer quantity) {
+        if (item.getStock() > 0) {
+            item.setStock(item.getStock() - quantity);
+        } else {
+            throw new DataNotFoundException("Item is empty");
+        }
     }
 }

@@ -120,14 +120,14 @@ class InventoryServiceImplTest {
         when(inventoryMapper.mapToInventory(request)).thenReturn(inventory);
 
         Item item = new Item();
-        item.setStock(20);
+        item.setStock(80);
         when(itemService.get(1)).thenReturn(item);
 
         inventoryService.update(1, request);
 
         verify(inventoryRepository).save(inventory);
         verify(itemService).upsert(itemArgumentCaptor.capture());
-        assertEquals(5, itemArgumentCaptor.getValue().getStock());
+        assertEquals(95, itemArgumentCaptor.getValue().getStock());
     }
 
 
@@ -144,14 +144,14 @@ class InventoryServiceImplTest {
         when(inventoryMapper.mapToInventory(request)).thenReturn(inventory);
 
         Item item = new Item();
-        item.setStock(20);
+        item.setStock(120);
         when(itemService.get(1)).thenReturn(item);
 
         inventoryService.update(1, request);
 
         verify(inventoryRepository).save(inventory);
         verify(itemService).upsert(itemArgumentCaptor.capture());
-        assertEquals(25, itemArgumentCaptor.getValue().getStock());
+        assertEquals(105, itemArgumentCaptor.getValue().getStock());
     }
 
     @Test
